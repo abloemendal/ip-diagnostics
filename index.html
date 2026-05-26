@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="description" content="Fast IP, ISP, network, browser, and device diagnostics page. Check your public IP address, approximate location, timezone, and browser/system details in one view." />
+  <title>WHAT IS MY IP</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23e3d525'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' font-weight='bold' text-anchor='middle' fill='%23000'%3EIP%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="src/styles.css?v=20260526-fix9" />
+  <style>
+    .app-footer {
+      margin-top: 3rem;
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 0.875rem;
+      color: #666;
+      border-top: 1px solid #e0e0e0;
+    }
+    .app-footer p {
+      margin: 0;
+      line-height: 1.6;
+    }
+    .app-footer a {
+      color: #0066cc;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .app-footer a:hover {
+      color: #0052a3;
+      text-decoration: underline;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .ip-container {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+
+    .ip-block {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 8px 0;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .ip-block h1 {
+      margin: 0;
+      min-width: 0;
+      word-break: break-all;
+      font-size: clamp(16px, 3.5vw, 44px);
+    }
+
+    .ip-copy-btn {
+      align-self: start;
+      padding: 8px 14px;
+      font-family: "Departure Mono", ui-monospace, monospace;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ffffff;
+      background: rgba(110, 231, 183, 0.15);
+      border: 1px solid rgba(110, 231, 183, 0.5);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .ip-copy-btn:hover {
+      background: rgba(110, 231, 183, 0.25);
+      border-color: rgba(110, 231, 183, 0.8);
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(110, 231, 183, 0.2);
+    }
+
+    .ip-copy-btn:active {
+      background: rgba(110, 231, 183, 0.35);
+      transform: scale(0.98) translateY(0);
+    }
+
+    .ip-copy-btn.copied {
+      background: rgba(110, 231, 183, 0.35);
+      border-color: rgba(110, 231, 183, 0.9);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(110, 231, 183, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell" role="region" aria-label="IP and device diagnostics">
+
+    <!-- HERO -->
+    <section class="grid">
+      <header class="hero panel wide">
+        <div id="hero-kicker" class="eyebrow ascii-fx">YOUR IP ADDRESS IS</div>
+        <div id="ip-container" class="ip-container">
+          <div id="ip-v4-block" class="ip-block hidden">
+            <h1 id="ip-address-v4" class="ip-value ascii-fx">LOADING...</h1>
+            <button id="copy-ipv4" class="ip-copy-btn" type="button" aria-label="COPY IPv4">COPY</button>
+          </div>
+          <div id="ip-v6-block" class="ip-block hidden">
+            <h1 id="ip-address-v6" class="ip-value ascii-fx">LOADING...</h1>
+            <button id="copy-ipv6" class="ip-copy-btn" type="button" aria-label="COPY IPv6">COPY</button>
+          </div>
+        </div>
+        <h1 id="ip-address" class="ip-value ascii-fx hidden">LOADING...</h1>
+        <div id="ip-summary" class="summary-line ascii-fx"></div>
+
+        <div id="snapshot-grid" class="snapshot-grid">
+          <div class="snapshot-card">
+            <div class="snapshot-key ascii-fx">COUNTRY</div>
+            <div id="snap-country" class="snapshot-value ascii-fx"></div>
+          </div>
+          <div class="snapshot-card">
+            <div class="snapshot-key ascii-fx">CITY</div>
+            <div id="snap-city" class="snapshot-value ascii-fx"></div>
+          </div>
+          <div class="snapshot-card">
+            <div class="snapshot-key ascii-fx">ISP</div>
+            <div id="snap-isp" class="snapshot-value ascii-fx"></div>
+          </div>
+          <div class="snapshot-card">
+            <div class="snapshot-key ascii-fx">TIMEZONE</div>
+            <div id="snap-timezone" class="snapshot-value ascii-fx"></div>
+          </div>
+          <div class="snapshot-card">
+            <div class="snapshot-key ascii-fx">BROWSER TZ</div>
+            <div id="snap-browser-tz" class="snapshot-value ascii-fx"></div>
+          </div>
+          <div class="snapshot-card">
+            <div class="snapshot-key ascii-fx">VIEWPORT</div>
+            <div id="snap-viewport" class="snapshot-value ascii-fx"></div>
+          </div>
+        </div>
+      </header>
+    </section>
+
+    <!-- ASCII CONTROLS (hidden by default, toggle with Cmd/Ctrl+K) -->
+    <section id="panel-ascii-controls-test" class="panel wide is-test-hidden">
+      <div class="panel-head">
+        <h2 class="ascii-fx">ANIMATION CONTROLS (TEST)</h2>
+        <div class="panel-head-actions">
+          <button id="ctrl-replay-all" class="speed-btn ascii-fx" type="button">REPLAY ALL</button>
+          <button id="ctrl-reset-ascii" class="speed-btn ascii-fx" type="button">RESET</button>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row">
+          <div class="key ascii-fx">BASE DURATION (MS)</div>
+          <div class="value control-cell">
+            <input id="ctrl-base-ms" type="range" min="0" max="2200" step="5" value="900" />
+            <span id="ctrl-base-ms-value">900</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="key ascii-fx">PER CHAR (MS)</div>
+          <div class="value control-cell">
+            <input id="ctrl-char-ms" type="range" min="0" max="300" step="1" value="150" />
+            <span id="ctrl-char-ms-value">150</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="key ascii-fx">MIN DURATION (MS)</div>
+          <div class="value control-cell">
+            <input id="ctrl-min-ms" type="range" min="40" max="2200" step="5" value="500" />
+            <span id="ctrl-min-ms-value">500</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="key ascii-fx">MAX DURATION (MS)</div>
+          <div class="value control-cell">
+            <input id="ctrl-max-ms" type="range" min="160" max="9000" step="10" value="3000" />
+            <span id="ctrl-max-ms-value">3000</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="key ascii-fx">HOVER COOLDOWN (MS)</div>
+          <div class="value control-cell">
+            <input id="ctrl-hover-cooldown" type="range" min="0" max="5000" step="10" value="3000" />
+            <span id="ctrl-hover-cooldown-value">3000</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="key ascii-fx">ASCII CHARSET</div>
+          <div class="value control-cell control-cell--stack">
+            <input id="ctrl-ascii-chars" type="text" value="01#*+=-[]{}<>/\|:;.^~_xX" />
+            <div id="ctrl-ascii-sample" class="control-sample ascii-fx">ASCII EFFECT SAMPLE</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SPEED TEST -->
+    <section id="panel-speed" class="panel wide">
+      <div class="panel-head">
+        <h2 class="ascii-fx">SPEED TEST</h2>
+        <div class="panel-head-actions">
+          <div id="speed-count" class="panel-count ascii-fx">12 FIELDS</div>
+          <button id="run-speed-test" class="speed-btn ascii-fx" type="button" data-run-speed-test>RUN TEST</button>
+        </div>
+      </div>
+      <div id="speed-rows" class="rows"></div>
+    </section>
+
+    <!-- NETWORK -->
+    <section id="panel-network" class="panel">
+      <div class="panel-head">
+        <h2 class="ascii-fx">NETWORK</h2>
+        <div id="network-count" class="panel-count ascii-fx">9 FIELDS</div>
+      </div>
+      <div id="network-rows" class="rows"></div>
+    </section>
+
+    <!-- GEO / TIME -->
+    <section id="panel-geo" class="panel">
+      <div class="panel-head">
+        <h2 class="ascii-fx">GEO / TIME</h2>
+        <div id="geo-count" class="panel-count ascii-fx">12 FIELDS</div>
+      </div>
+      <div id="geo-rows" class="rows"></div>
+    </section>
+
+    <!-- BROWSER -->
+    <section id="panel-browser" class="panel">
+      <div class="panel-head">
+        <h2 class="ascii-fx">BROWSER</h2>
+        <div id="browser-count" class="panel-count ascii-fx">17 FIELDS</div>
+      </div>
+      <div id="browser-rows" class="rows"></div>
+    </section>
+
+    <!-- DEVICE / SCREEN -->
+    <section id="panel-device" class="panel">
+      <div class="panel-head">
+        <h2 class="ascii-fx">DEVICE / SCREEN</h2>
+        <div id="device-count" class="panel-count ascii-fx">14 FIELDS</div>
+      </div>
+      <div id="device-rows" class="rows"></div>
+    </section>
+
+    <!-- RAW JSON -->
+    <section id="panel-raw" class="panel wide">
+      <div class="panel-head">
+        <h2 class="ascii-fx">RAW JSON</h2>
+        <div class="panel-count ascii-fx">LIVE DUMP</div>
+      </div>
+      <pre id="raw-json" class="raw-json"></pre>
+    </section>
+
+    <!-- FOOTER / CREDITS -->
+    <footer class="app-footer">
+      <p>
+        Enhanced version built with Claude. Original work by <a href="https://yaosamo.com/about" target="_blank" rel="noopener noreferrer">Yaroslav Samoylov</a> at <a href="https://internet.yaosamo.com/" target="_blank" rel="noopener noreferrer">internet.yaosamo.com</a>.
+      </p>
+      <p>
+        <a href="https://github.com/alexbloemendal/ip-diagnostics" target="_blank" rel="noopener noreferrer">View enhanced version on GitHub</a>
+      </p>
+    </footer>
+
+  </main>
+
+  <!-- Row template -->
+  <template id="row-template">
+    <div class="row">
+      <div class="key"></div>
+      <div class="value"></div>
+    </div>
+  </template>
+
+  <script type="module" src="src/app.js?v=20260526-fix7"></script>
+</body>
+</html>
