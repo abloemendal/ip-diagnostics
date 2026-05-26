@@ -9,7 +9,7 @@
   <meta name="description" content="Fast IP, ISP, network, browser, and device diagnostics page. Check your public IP address, approximate location, timezone, and browser/system details in one view." />
   <title>WHAT IS MY IP</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23e3d525'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='18' font-weight='bold' text-anchor='middle' fill='%23000'%3EIP%3C/text%3E%3C/svg%3E" />
-  <link rel="stylesheet" href="src/styles.css?v=20260526-fix9" />
+  <link rel="stylesheet" href="src/styles.css?v=20260526-fix13" />
   <style>
     .app-footer {
       margin-top: 3rem;
@@ -56,18 +56,20 @@
       margin: 0;
       min-width: 0;
       word-break: break-all;
-      font-size: clamp(16px, 3.5vw, 44px);
+      font-size: clamp(10px, 1.8vw, 24px);
     }
 
     .ip-copy-btn {
       align-self: start;
+      justify-self: start;
+      width: fit-content;
       padding: 8px 14px;
       font-family: "Departure Mono", ui-monospace, monospace;
       font-size: 10px;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #ffffff;
+      color: #111111;
       background: rgba(110, 231, 183, 0.15);
       border: 1px solid rgba(110, 231, 183, 0.5);
       border-radius: 6px;
@@ -80,7 +82,7 @@
     .ip-copy-btn:hover {
       background: rgba(110, 231, 183, 0.25);
       border-color: rgba(110, 231, 183, 0.8);
-      color: #ffffff;
+      color: #111111;
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(110, 231, 183, 0.2);
     }
@@ -93,7 +95,7 @@
     .ip-copy-btn.copied {
       background: rgba(110, 231, 183, 0.35);
       border-color: rgba(110, 231, 183, 0.9);
-      color: #ffffff;
+      color: #111111;
       box-shadow: 0 2px 8px rgba(110, 231, 183, 0.3);
     }
   </style>
