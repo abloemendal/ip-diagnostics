@@ -77,3 +77,4 @@ Special thanks to **Yaroslav Samoylov** for creating the original internet.yaosa
 ---
 
 **Built with Claude** — An AI assistant by Anthropic
+# ip-diagnostics
